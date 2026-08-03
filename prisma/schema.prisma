@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  role         String    @default("customer")
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  merchants Merchant[]
+}
+
+model Merchant {
+  id          Int       @id @default(autoincrement())
+  name        String
+  ownerUserId Int
+  deletedAt   DateTime?
+
+  owner    User      @relation(fields: [ownerUserId], references: [id])
+  products Product[]
+
+  @@index([ownerUserId])
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  merchantId  Int
+  name        String
+  description String    @default("")
+  priceCents  Int
+  stock       Int       @default(0)
+  deletedAt   DateTime?
+
+  merchant Merchant    @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId])
+}
