@@ -16,6 +16,7 @@ model User {
   createdAt    DateTime  @default(now())
 
   merchants Merchant[]
+  orders    Order[]
 }
 
 model Merchant {
@@ -26,6 +27,7 @@ model Merchant {
 
   owner    User      @relation(fields: [ownerUserId], references: [id])
   products Product[]
+  orders   Order[]
 
   @@index([ownerUserId])
 }
@@ -40,6 +42,40 @@ model Product {
   deletedAt   DateTime?
 
   merchant Merchant    @relation(fields: [merchantId], references: [id])
+  items    OrderItem[]
 
   @@index([merchantId])
+}
+
+model Order {
+  id            Int       @id @default(autoincrement())
+  customerId    Int
+  merchantId    Int
+  status        String    @default("pending")
+  subtotalCents Int
+  discountCents Int       @default(0)
+  vatCents      Int
+  totalCents    Int
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  customer User        @relation(fields: [customerId], references: [id])
+  merchant Merchant    @relation(fields: [merchantId], references: [id])
+  items    OrderItem[]
+
+  @@index([merchantId, createdAt])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id             Int @id @default(autoincrement())
+  orderId        Int
+  productId      Int
+  quantity       Int
+  unitPriceCents Int
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
 }
