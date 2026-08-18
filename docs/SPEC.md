@@ -95,10 +95,40 @@ a row or skip one.**
 
 ## 6. Payments
 
-*Not settled.* Card payments through our provider. Writing this up once the provider contract
-is signed.
+Payment is by card, through our provider.
 
-## 7. Out of scope for launch
+The provider occasionally takes longer to answer than our client is willing to wait. Clients
+therefore send an `Idempotency-Key` header with each payment attempt and retry on timeout.
+
+> **A retry carrying an idempotency key we have already acted on must not result in a second
+> charge.** One key means at most one charge against the customer's card.
+
+Once a payment is captured, the order is confirmed and the customer is emailed a confirmation.
+A confirmation must only be sent for an order that was actually confirmed.
+
+---
+
+## 7. Wallet and payouts
+
+Sales credit a merchant's wallet. Payouts run weekly, and a merchant may also request an early
+payout at any time.
+
+> **A payout may never exceed the wallet balance.** The wallet balance may never go negative.
+
+*Not settled:* payout fees, and whether early payouts should be rate limited.
+
+---
+
+## 8. Reporting
+
+Merchants receive a sales report at the end of each day covering that day's orders: total
+value and order count.
+
+*Not settled:* weekly and monthly rollups, and whether the report should break down by product.
+
+---
+
+## 9. Out of scope for launch
 
 Refunds, partial shipments, multi-merchant baskets, delivery tracking, and the merchant mobile
 application.
