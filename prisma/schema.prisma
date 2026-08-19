@@ -28,6 +28,8 @@ model Merchant {
   owner    User      @relation(fields: [ownerUserId], references: [id])
   products Product[]
   orders   Order[]
+  wallet   Wallet?
+  payouts  Payout[]
 
   @@index([ownerUserId])
 }
@@ -62,6 +64,7 @@ model Order {
   customer User        @relation(fields: [customerId], references: [id])
   merchant Merchant    @relation(fields: [merchantId], references: [id])
   items    OrderItem[]
+  payments Payment[]
 
   @@index([merchantId, createdAt])
   @@index([customerId])
@@ -78,4 +81,37 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
+}
+
+model Payment {
+  id             Int      @id @default(autoincrement())
+  orderId        Int
+  providerRef    String?
+  idempotencyKey String   @unique
+  amountCents    Int
+  status         String   @default("pending")
+  createdAt      DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+model Wallet {
+  merchantId   Int @id
+  balanceCents Int @default(0)
+
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+}
+
+model Payout {
+  id          Int      @id @default(autoincrement())
+  merchantId  Int
+  amountCents Int
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  @@index([merchantId])
 }
